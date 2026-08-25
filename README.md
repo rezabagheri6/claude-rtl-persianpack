@@ -3,6 +3,21 @@
 > **English:** Right-to-left rendering for Persian / Arabic / Hebrew text in [claude.ai](https://claude.ai) chats — available both as a userscript and as a Chrome/Edge MV3 extension.
 > Direction is decided per block from the ratio of strong RTL characters, so bilingual threads stay correct paragraph by paragraph, list padding and blockquote borders are mirrored via logical properties, and code blocks and math stay LTR. Toggle with `Ctrl+Alt+R`.
 > **Install:** run `install.ps1` on Windows, paste `extension/claude-rtl.user.js` into Tampermonkey, or load `extension/` unpacked from `chrome://extensions`.
+>
+> **Second, separate part** — `claude-code/` fixes Persian in the Claude Code *terminal*, a different bug with a different cause: that renderer takes each line's base direction from the line's first strong character and ignores U+200F/U+202B entirely, so a Persian line opening with a Latin token renders mirrored. It ships a writing rule for `~/.claude/CLAUDE.md` plus a `/persian-rtl` skill that audits existing text. Install with `install-skill.ps1`.
+
+این ریپو دو بخش مستقل دارد که دو مشکل جدا را حل می‌کنند:
+
+| بخش | مشکل | راه‌حل |
+| --- | --- | --- |
+| [`extension/`](extension/) | چت `claude.ai` در مرورگر چپ‌چین است | افزونه‌ی مرورگر / یوزراسکریپت |
+| [`claude-code/`](claude-code/) | متن فارسی در ترمینال Claude Code به‌هم می‌ریزد | اسکیل + قانون نگارشی |
+
+هر کدام را جدا می‌شود نصب کرد؛ به هم وابسته نیستند.
+
+---
+
+# بخش اول: افزونه‌ی مرورگر
 
 راست‌چین کردن متن فارسی/عربی در چت‌های `claude.ai`.
 
@@ -96,9 +111,60 @@ powershell -ExecutionPolicy Bypass -File pack.ps1
 
 ## محدودیت‌ها
 
-- **اپ دسکتاپ کلاد** (نسخه‌ی Electron) افزونه یا یوزراسکریپت را اجرا نمی‌کند. این پکیج فقط روی `claude.ai` در مرورگر کار می‌کند.
-- **Claude Code در ترمینال** هم شامل این پکیج نمی‌شود؛ راست‌چین کردن آنجا به پشتیبانی bidi خود ترمینال بستگی دارد.
+- **اپ دسکتاپ کلاد** (نسخه‌ی Electron) افزونه یا یوزراسکریپت را اجرا نمی‌کند. روی ویندوز به‌صورت یک پکیج MSIX امضاشده در `C:\Program Files\WindowsApps` نصب می‌شود که نه قابل خواندن است نه قابل تغییر. این بخش فقط روی `claude.ai` در مرورگر کار می‌کند.
 - جدول‌های خیلی پهن و نمودارهای Mermaid همان‌طور که هستند رندر می‌شوند (LTR).
+
+---
+
+# بخش دوم: Claude Code در ترمینال
+
+مشکل اینجا کاملاً متفاوت است. رندرر ترمینال Claude Code حروف عربی را درست به هم می‌چسباند و الگوریتم bidi را هم اجرا می‌کند، ولی **جهت پایه‌ی هر خط را از اولین کاراکتر جهت‌دارِ همان خط** می‌گیرد و **کاراکترهای کنترل جهت یونیکد را نادیده می‌گیرد**.
+
+نتیجه‌اش با آزمایش تأیید شد:
+
+| خط | نتیجه |
+| --- | --- |
+| `فایل config.json را در ۳ ثانیه باز کن.` | درست |
+| `config.json را در ۳ ثانیه باز کن.` | خراب |
+| `‏config.json را در ۳ ثانیه باز کن.` (با U+200F) | باز هم خراب |
+
+محتوا یکسان است و تنها فرق، کلمه‌ی اول خط است. خطی که با حرف لاتین شروع شود جهت پایه‌ی LTR می‌گیرد، و آن‌وقت نقطه‌ی آخر جمله به لبه‌ی چپ می‌پرد و کلمات انگلیسی و اعداد وسط جمله جابه‌جا می‌شوند.
+
+پس قانون این است: **هر خط فارسی باید با یک کلمه‌ی فارسی شروع شود.** مثلاً «اسکریپت `install.ps1` را اجرا کن» به‌جای «`install.ps1` را اجرا کن».
+
+## نصب
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install-skill.ps1
+```
+
+اسکریپت دو کار می‌کند:
+
+۱. پوشه‌ی `claude-code/persian-rtl` را در `~/.claude/skills/` کپی می‌کند تا اسکیل با `/persian-rtl` در دسترس باشد.
+۲. قانون نگارشی را به `~/.claude/CLAUDE.md` اضافه می‌کند. این فایل در هر سشن خودکار بارگذاری می‌شود، پس روشن‌کردن نمی‌خواهد.
+
+اگر فقط اسکیل را می‌خواهی و `CLAUDE.md` دست نخورد، از `-SkillOnly` استفاده کن. اجرای دوباره‌ی اسکریپت بی‌خطر است: قانون تکراری اضافه نمی‌شود و اگر پوشه‌ای به نام `persian-rtl` وجود داشته باشد که این اسکیل نباشد، اسکریپت متوقف می‌شود و چیزی را پاک نمی‌کند.
+
+## استفاده از اسکیل
+
+قانون همیشه‌روشن کار روزمره را می‌کند. اسکیل برای بازرسی متنِ **موجود** است:
+
+```bash
+python claude-code/persian-rtl/scripts/check_rtl.py path/to/file.md
+```
+
+چند مسیر یا `-` برای stdin می‌گیرد و اگر چیزی پیدا کند با کد خروجی ۱ خارج می‌شود، پس در pre-commit یا CI هم می‌نشیند.
+
+- گزینه‌ی `--threshold N` حداقل نسبت کاراکتر فارسی برای اینکه خط «فارسی» حساب شود (پیش‌فرض `0.25`).
+- گزینه‌ی `--include-code` داخل بلوک‌های کد را هم بررسی می‌کند (پیش‌فرض خاموش).
+
+برای خاموش کردن هشدارهای نادرست: عبارت `rtl-check: off` در هر جای فایل کل فایل را رد می‌کند و `rtl-ok` روی یک خط فقط همان خط را. معمولاً داخل کامنت مارک‌داون نوشته می‌شوند تا نامرئی بمانند.
+
+## آنچه حل نمی‌شود
+
+متن ترمینال همیشه از لبه‌ی چپ شروع می‌شود. پر کردن ابتدای خطوط با فاصله برای شبیه‌سازی تراز راست، با تغییر اندازه‌ی پنجره به‌هم می‌ریزد و بلوک‌های کد را خراب می‌کند.
+
+همچنین کاراکترهای کنترل جهت (U+200F و U+202B و مانند این‌ها) اینجا بی‌فایده‌اند — رندرر نادیده‌شان می‌گیرد ولی هنگام کپی‌پیست به‌صورت آشغال نامرئی باقی می‌مانند. اسکیل وجودشان را گزارش می‌دهد.
 
 ---
 
