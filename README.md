@@ -1,7 +1,8 @@
 # Claude RTL Chat
 
 > **English:** Right-to-left rendering for Persian / Arabic / Hebrew text in [claude.ai](https://claude.ai) chats — available both as a userscript and as a Chrome/Edge MV3 extension.
-> Direction is decided per block from the ratio of strong RTL characters, so bilingual threads stay correct paragraph by paragraph, list padding and blockquote borders are mirrored via logical properties, and code blocks and math stay LTR. Toggle with `Ctrl+Alt+R`. See [Install](#نصب--روش-۱-یوزراسکریپت-ساده‌تر) below, or just load `extension/` as an unpacked extension.
+> Direction is decided per block from the ratio of strong RTL characters, so bilingual threads stay correct paragraph by paragraph, list padding and blockquote borders are mirrored via logical properties, and code blocks and math stay LTR. Toggle with `Ctrl+Alt+R`.
+> **Install:** run `install.ps1` on Windows, paste `extension/claude-rtl.user.js` into Tampermonkey, or load `extension/` unpacked from `chrome://extensions`.
 
 راست‌چین کردن متن فارسی/عربی در چت‌های `claude.ai`.
 
@@ -25,21 +26,51 @@
 - کادر نوشتن پیام هم راست‌چین می‌شود، چون همان پاراگراف‌های ProseMirror اسکن می‌شوند.
 - یک فونت فارسی (Vazirmatn / IRANSans / Tahoma، هرکدام روی سیستم نصب باشد) روی بلوک‌های RTL اعمال می‌شود.
 
-## نصب — روش ۱: یوزراسکریپت (ساده‌تر)
+## نصب سریع (ویندوز)
+
+اگر ریپو را کلون یا دانلود کرده‌اید، در ریشه‌ی پروژه این را اجرا کنید:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+اسکریپت افزونه را به `%LOCALAPPDATA%\ClaudeRTL\extension` کپی می‌کند (جای ثابت، تا اگر پوشه‌ی پروژه را جابه‌جا کردید مرورگر افزونه را گم نکند)، مسیر را در کلیپ‌بورد می‌گذارد و صفحه‌ی extensions را باز می‌کند. سه کلیک آخر دست خودتان است، چون کروم برای «Load unpacked» رابط خط فرمان ندارد:
+
+۱. **Developer mode** را روشن کنید (بالا سمت راست).
+۲. **Load unpacked** را بزنید.
+۳. مسیر را در کادر انتخاب پوشه Paste کنید.
+
+برای Edge از `-Browser edge` استفاده کنید. اگر پوشه‌ی مقصد قبلاً وجود داشته باشد و متعلق به این افزونه نباشد، اسکریپت با خطا متوقف می‌شود و چیزی را پاک نمی‌کند.
+
+## نصب — یوزراسکریپت
+
+سبک‌ترین راه؛ به Developer mode هم نیاز ندارد.
 
 ۱. افزونه [Tampermonkey](https://www.tampermonkey.net/) یا Violentmonkey را نصب کنید.
-۲. فایل [`extension/claude-rtl.user.js`](extension/claude-rtl.user.js) را باز کنید، کل محتوایش را کپی کنید.
+۲. فایل [`extension/claude-rtl.user.js`](extension/claude-rtl.user.js) را باز کنید و کل محتوایش را کپی کنید.
 ۳. در Tampermonkey یک اسکریپت جدید بسازید، محتوا را جایگزین کنید و ذخیره کنید (`Ctrl+S`).
 ۴. `claude.ai` را باز/رفرش کنید.
 
-## نصب — روش ۲: افزونه کروم
+> **اگر ریپو را پابلیک کنید**، این مرحله به یک کلیک کاهش پیدا می‌کند: کافی است لینک زیر را باز کنید تا Tampermonkey خودش صفحه‌ی نصب را نشان دهد. تا وقتی ریپو پرایوت است این لینک برای دیگران کار نمی‌کند.
+>
+> `https://raw.githubusercontent.com/rezabagheri6/claude-rtl-persianpack/main/extension/claude-rtl.user.js`
 
-۱. `chrome://extensions` را باز کنید.
+## نصب — افزونه (دستی)
+
+۱. `chrome://extensions` را باز کنید (یا `edge://extensions`).
 ۲. **Developer mode** را روشن کنید.
-۳. **Load unpacked** را بزنید و پوشه‌ی `claude-rtl/extension` را انتخاب کنید.
+۳. **Load unpacked** را بزنید و پوشه‌ی `extension` را انتخاب کنید.
 ۴. `claude.ai` را باز/رفرش کنید.
 
-روی Edge هم دقیقاً همین مراحل جواب می‌دهد (`edge://extensions`).
+## ساخت فایل zip
+
+برای انتشار در بخش Releases:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File pack.ps1
+```
+
+خروجی در `dist/claude-rtl-persianpack-<version>.zip` ساخته می‌شود.
 
 ## استفاده
 
