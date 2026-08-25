@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>Claude RTL</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 14px 16px;
+        width: 230px;
+        font-family: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+        font-size: 13px;
+        color: #1f1f1f;
+        background: #fff;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+      }
+      #note {
+        margin-top: 10px;
+        font-size: 11px;
+        line-height: 1.7;
+        color: #6b6b6b;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: #ececec;
+          background: #1f1f1f;
+        }
+        #note {
+          color: #9c9c9c;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>راست‌چین کردن چت کلاد</h1>
+    <label>
+      <input type="checkbox" id="toggle" />
+      <span>فعال</span>
+    </label>
+    <p id="note">میان‌بر صفحه‌کلید: Ctrl + Alt + R</p>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Claude RTL — sandbox</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #faf9f5;
+        --fg: #1f1e1d;
+        --muted: #6f6c66;
+        --line: #dedbd3;
+        --bubble: #eeece5;
+        --code: #f3f1ea;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #262624;
+          --fg: #eeece5;
+          --muted: #a3a09a;
+          --line: #3c3b38;
+          --bubble: #34322e;
+          --code: #1f1e1d;
+        }
+      }
+      body {
+        margin: 0;
+        padding: 24px 16px 140px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 15px/1.75 "Segoe UI", system-ui, sans-serif;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .msg {
+        margin: 0 0 28px;
+      }
+      .msg.user .body {
+        background: var(--bubble);
+        border-radius: 14px;
+        padding: 10px 16px;
+      }
+      .role {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      /* deliberately physical, like Tailwind's pl-6 / border-l-2 */
+      .body ul,
+      .body ol {
+        padding-left: 1.5rem;
+        margin: 0.75em 0;
+      }
+      .body blockquote {
+        border-left: 3px solid var(--line);
+        padding-left: 1em;
+        margin: 0.75em 0;
+        color: var(--muted);
+      }
+      .body pre {
+        background: var(--code);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px 14px;
+        overflow-x: auto;
+        font: 13px/1.6 ui-monospace, Consolas, monospace;
+      }
+      .body :not(pre) > code {
+        background: var(--code);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font: 0.9em ui-monospace, Consolas, monospace;
+      }
+      table {
+        border-collapse: collapse;
+        margin: 0.75em 0;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 6px 10px;
+      }
+      #composer {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        padding: 12px 16px 20px;
+        background: var(--bg);
+        border-top: 1px solid var(--line);
+      }
+      #composer .box {
+        max-width: 720px;
+        margin: 0 auto;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 14px;
+        min-height: 24px;
+        background: var(--bubble);
+      }
+      #composer p {
+        margin: 0;
+      }
+      #bar {
+        position: fixed;
+        top: 12px;
+        inset-inline-end: 12px;
+        display: flex;
+        gap: 8px;
+      }
+      #bar button {
+        font: 12px/1 "Segoe UI", sans-serif;
+        padding: 7px 11px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--bubble);
+        color: var(--fg);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bar">
+      <button id="toggle">Toggle RTL (Ctrl+Alt+R)</button>
+      <button id="stream">Simulate streaming reply</button>
+    </div>
+
+    <main id="thread">
+      <div class="msg user">
+        <div class="role">You</div>
+        <div class="body">
+          <p>سلام، لطفاً یک خلاصه از تفاوت <code>useMemo</code> و <code>useCallback</code> بده.</p>
+        </div>
+      </div>
+
+      <div class="msg assistant">
+        <div class="role">Claude</div>
+        <div class="body">
+          <p>حتماً. تفاوت اصلی در چیزی است که هر کدام کش می‌کنند:</p>
+          <ul>
+            <li><code>useMemo</code> نتیجه‌ی محاسبه را نگه می‌دارد.</li>
+            <li><code>useCallback</code> خودِ تابع را نگه می‌دارد.</li>
+            <li>هر دو به آرایه‌ی وابستگی‌ها (dependency array) حساس‌اند.</li>
+          </ul>
+          <blockquote>
+            <p>نکته: بهینه‌سازی زودهنگام معمولاً بیشتر از سودش هزینه دارد.</p>
+          </blockquote>
+          <p>یک نمونه‌ی کد:</p>
+          <pre><code>const total = useMemo(() =&gt; items.reduce((a, b) =&gt; a + b.price, 0), [items]);
+const onPick = useCallback((id) =&gt; setSelected(id), []);</code></pre>
+          <table>
+            <thead>
+              <tr>
+                <th>هوک</th>
+                <th>خروجی</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>useMemo</td>
+                <td>مقدار</td>
+              </tr>
+              <tr>
+                <td>useCallback</td>
+                <td>تابع</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="role">You</div>
+        <div class="body">
+          <p>Now answer the same question in English, please.</p>
+        </div>
+      </div>
+
+      <div class="msg assistant">
+        <div class="role">Claude</div>
+        <div class="body">
+          <p>Sure — this paragraph must stay left-to-right while the Persian ones above flip.</p>
+          <ol>
+            <li><code>useMemo</code> caches a computed value.</li>
+            <li><code>useCallback</code> caches the function identity.</li>
+          </ol>
+        </div>
+      </div>
+    </main>
+
+    <div id="composer">
+      <div class="box" contenteditable="true"><p>یک پیام آزمایشی بنویسید…</p></div>
+    </div>
+
+    <script src="../extension/claude-rtl.user.js"></script>
+    <script>
+      document.getElementById('toggle').addEventListener('click', function () {
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'r', ctrlKey: true, altKey: true, bubbles: true })
+        );
+      });
+
+      // Appends a message token by token, so the MutationObserver path is exercised.
+      document.getElementById('stream').addEventListener('click', function () {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg assistant';
+        wrap.innerHTML = '<div class="role">Claude</div><div class="body"></div>';
+        document.getElementById('thread').appendChild(wrap);
+
+        const body = wrap.querySelector('.body');
+        const p = document.createElement('p');
+        body.appendChild(p);
+
+        const words = 'این پاسخ کلمه به کلمه اضافه می‌شود تا رفتار اسکریپت هنگام استریم شدن پیام بررسی شود .'.split(
+          ' '
+        );
+        let i = 0;
+        const id = setInterval(function () {
+          if (i >= words.length) {
+            clearInterval(id);
+            const ul = document.createElement('ul');
+            ul.innerHTML = '<li>آیتم اول لیستی که بعد از استریم اضافه شد</li><li>آیتم دوم</li>';
+            body.appendChild(ul);
+            return;
+          }
+          p.textContent += (i ? ' ' : '') + words[i++];
+        }, 60);
+      });
+    </script>
+  </body>
+</html>

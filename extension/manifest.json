@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Claude RTL Chat",
+  "version": "1.1.0",
+  "description": "Right-to-left rendering for Persian/Arabic/Hebrew text in claude.ai chats.",
+  "author": "reza bagheri (rezabagheri6)",
+  "host_permissions": ["https://claude.ai/*", "https://*.claude.ai/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://claude.ai/*", "https://*.claude.ai/*"],
+      "js": ["claude-rtl.user.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Claude RTL"
+  }
+}
