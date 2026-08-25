@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Claude RTL Chat
 // @namespace    https://github.com/rezabagheri6/claude-rtl
-// @version      1.1.0
+// @version      1.2.0
 // @description  RTL rendering for Persian / Arabic / Hebrew text on claude.ai. The same file also works as a Chrome MV3 content script.
 // @author       reza bagheri (rezabagheri6)
 // @match        https://claude.ai/*
@@ -25,6 +25,10 @@
     persianFont: true,
     fontStack:
       '"Vazirmatn", "Vazir", "IRANSansX", "IRANSans", "IRANYekan", "Sahel", "Segoe UI", Tahoma, sans-serif',
+    // Also set direction on text-bearing leaves inside navigation regions,
+    // which is where conversation titles live. Set false if a sidebar ever
+    // lays out oddly.
+    sidebar: true,
     // Ctrl+Alt+R toggles RTL on/off.
     hotkey: { key: 'r', ctrl: true, alt: true, shift: false },
     defaultEnabled: true,
@@ -43,6 +47,11 @@
   const SKIP = 'pre,code,kbd,samp,.katex,[data-claude-rtl-skip]';
   // Containers whose physical left/right padding+border need mirroring in RTL.
   const MIRROR = { UL: 1, OL: 1, BLOCKQUOTE: 1 };
+  // Navigation regions, and the leaf tags inside them that carry a label.
+  const NAV = 'nav,aside,[role="navigation"],[role="list"]';
+  const NAV_LEAVES = 'a,div,span,button,li,p,h1,h2,h3,h4,h5,h6';
+  // Enough characters to classify a block; see sampleText.
+  const SAMPLE_LIMIT = 400;
 
   // Hebrew, Arabic, Persian, Syriac, Thaana, Arabic Supplement/Extended,
   // and the Arabic presentation forms.
@@ -123,13 +132,40 @@
   /* ----------------------------------------------------------------- classify */
 
   /**
+   * Read at most `limit` characters of an element's text.
+   *
+   * `textContent` builds the entire string before anything gets sliced off it,
+   * and streaming re-classifies a growing list or table on every token, so the
+   * cost climbed with the length of the message. Walking text nodes and
+   * stopping early bounds it instead. Code and math are skipped on the way,
+   * which also stops a long identifier from outvoting the sentence holding it.
+   */
+  function sampleText(el, limit) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        const parent = node.parentElement;
+        if (parent && parent.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    let out = '';
+    let node = walker.nextNode();
+    while (node) {
+      out += node.nodeValue;
+      if (out.length >= limit) break;
+      node = walker.nextNode();
+    }
+    return out;
+  }
+
+  /**
    * `dir="auto"` is not usable here: it ignores text that sits inside a child
    * carrying its own dir attribute, so a <ul> whose <li>s are already marked
    * always falls back to LTR. Count the characters instead.
    */
   function classify(text) {
     if (!text) return null;
-    const t = text.length > 400 ? text.slice(0, 400) : text;
+    const t = text.length > SAMPLE_LIMIT ? text.slice(0, SAMPLE_LIMIT) : text;
     const rtl = (t.match(RTL_RE) || []).length;
     const ltr = (t.match(LTR_RE) || []).length;
     if (!rtl && !ltr) return null;
@@ -183,7 +219,7 @@
     if (!el || el.nodeType !== 1) return;
     if (el.closest(SKIP)) return;
 
-    const dir = classify(el.textContent);
+    const dir = classify(sampleText(el, SAMPLE_LIMIT));
     if (!dir) return; // nothing directional yet — revisit when text arrives
 
     if (el.dataset.claudeRtl !== '1') {
@@ -199,12 +235,36 @@
     if (dir === 'rtl' && MIRROR[el.tagName]) mirrorBox(el);
   }
 
+  /**
+   * Conversation titles in the sidebar are plain divs and anchors, not any of
+   * the tags in BLOCKS, so they stay LTR without this. Only true leaves are
+   * touched — an element whose children are all text nodes — which keeps the
+   * attribute off layout containers.
+   */
+  function scanNav(root) {
+    if (!CONFIG.sidebar || !root.querySelectorAll) return;
+
+    const regions = [];
+    if (root.nodeType === 1 && root.matches(NAV)) regions.push(root);
+    const nested = root.querySelectorAll(NAV);
+    for (let i = 0; i < nested.length; i++) regions.push(nested[i]);
+
+    for (let i = 0; i < regions.length; i++) {
+      const leaves = regions[i].querySelectorAll(NAV_LEAVES);
+      for (let j = 0; j < leaves.length; j++) {
+        if (leaves[j].firstElementChild) continue; // a container, not a label
+        apply(leaves[j]);
+      }
+    }
+  }
+
   function scan(root) {
     if (!root) return;
     if (root.nodeType === 1 && root.matches(BLOCKS)) apply(root);
     if (!root.querySelectorAll) return;
     const found = root.querySelectorAll(BLOCKS);
     for (let i = 0; i < found.length; i++) apply(found[i]);
+    scanNav(root);
   }
 
   function revertAll() {

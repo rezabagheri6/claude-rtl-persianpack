@@ -105,6 +105,41 @@
       #composer p {
         margin: 0;
       }
+      #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 210px;
+        padding: 14px 10px;
+        border-right: 1px solid var(--line);
+        background: var(--bubble);
+        overflow-y: auto;
+        font-size: 13px;
+      }
+      #sidebar .nav-head {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      #sidebar .nav-item {
+        display: block;
+        padding: 6px 8px;
+        border-radius: 7px;
+        color: var(--fg);
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #sidebar .nav-item:hover {
+        background: var(--code);
+      }
+      body {
+        padding-left: 240px;
+      }
       #bar {
         position: fixed;
         top: 12px;
@@ -128,6 +163,21 @@
       <button id="toggle">Toggle RTL (Ctrl+Alt+R)</button>
       <button id="stream">Simulate streaming reply</button>
     </div>
+
+    <!-- Mock sidebar: conversation titles are plain divs and anchors, the
+         shape the extension has to handle without any tag from BLOCKS. -->
+    <nav id="sidebar" aria-label="Conversations">
+      <div class="nav-head">گفتگوها</div>
+      <a href="#" class="nav-item">تفاوت useMemo و useCallback در ری‌اکت</a>
+      <a href="#" class="nav-item">راه‌اندازی CI روی GitHub Actions</a>
+      <a href="#" class="nav-item">Debugging a memory leak in production</a>
+      <a href="#" class="nav-item"
+        >یک عنوان خیلی طولانی که باید از سمت راست بریده شود و سه‌نقطه بگیرد</a
+      >
+      <div class="nav-item">
+        <span>پوشه‌ی پروژه</span>
+      </div>
+    </nav>
 
     <main id="thread">
       <div class="msg user">

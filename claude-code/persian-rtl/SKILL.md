@@ -37,10 +37,31 @@ Accepts several paths, or `-` to read stdin. Exit status is 1 when something
 was flagged, so it drops into a pre-commit hook or CI step unchanged.
 
 - `--threshold N` — minimum ratio of RTL characters for a line to be treated as
-  Persian. Default `0.25`, which keeps a Persian sentence carrying inline
-  English identifiers in scope while leaving mostly-English prose alone.
+  Persian. Default `0.25`. See below.
 - `--include-code` — also scan inside fenced code blocks. Off by default,
   because code is meant to be LTR.
+- `--stats` — report the ratio distribution instead of checking, to recalibrate
+  the threshold against a corpus rather than guessing at it.
+
+### Why the threshold is 0.25
+
+Inline code spans, markdown link targets, and bare URLs are excluded from the
+ratio. An identifier in backticks says nothing about the language of the
+sentence around it, and counting it drags genuinely Persian lines down.
+
+Measured with `--stats` over this project's Persian README (82 lines) against a
+set of English lines that merely quote a Persian word:
+
+| corpus | min | p05 | median |
+| --- | --- | --- | --- |
+| genuinely Persian lines | 0.400 | 0.531 | 1.000 |
+| English quoting Persian | 0.077 | — | 0.082 |
+
+The two groups sit far apart, so anything between roughly 0.15 and 0.40 works.
+`0.25` is deliberately biased toward the low end: missing a broken line is
+worse than one spurious warning. Before the exclusions the Persian minimum was
+0.273, which left almost no margin — widening the gap mattered more than the
+number itself.
 
 ### Suppressing false positives
 
@@ -53,6 +74,19 @@ two escape hatches exist:
 Both are usually written inside a markdown comment, `<!-- rtl-check: off -->`,
 so they stay invisible when rendered. This file and `~/.claude/CLAUDE.md` are
 both marked off for exactly that reason.
+
+Markers inside inline code spans do not count. Documenting the marker in a
+README once disabled that README, so the text is stripped of code spans before
+the markers are looked for.
+
+## Tests
+
+```bash
+python -m unittest discover tests
+```
+
+21 tests covering first-strong-character detection, the language threshold,
+direction controls, code fences, and the suppression markers.
 
 ## Fixing what it reports
 
