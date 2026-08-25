@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Claude RTL Chat
-// @namespace    https://github.com/rezabagheri6/claude-rtl
+// @namespace    https://github.com/rezabagheri6/claude-rtl-persianpack
 // @version      1.2.1
 // @description  RTL rendering for Persian / Arabic / Hebrew text on claude.ai. The same file also works as a Chrome MV3 content script.
 // @author       reza bagheri (rezabagheri6)
