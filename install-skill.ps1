@@ -62,7 +62,14 @@ if (Test-Path $target) {
 }
 
 Copy-Item (Join-Path $source 'persian-rtl') -Destination $target -Recurse -Force
-Write-Host "  Skill installed: $target"
+
+# Running the tests before installing leaves compiled bytecode behind, and
+# there is no reason to carry it into someone's skills folder.
+Get-ChildItem $target -Recurse -Directory -Filter '__pycache__' -ErrorAction SilentlyContinue |
+    ForEach-Object { Remove-Item $_.FullName -Recurse -Force }
+
+$count = (Get-ChildItem $target -Recurse -File | Measure-Object).Count
+Write-Host "  Skill installed: $target  ($count files)"
 Write-Host '  Invoke it with /persian-rtl'
 
 # --- the always-on rule ---------------------------------------------------
