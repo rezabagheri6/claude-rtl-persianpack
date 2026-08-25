@@ -49,18 +49,18 @@ Inline code spans, markdown link targets, and bare URLs are excluded from the
 ratio. An identifier in backticks says nothing about the language of the
 sentence around it, and counting it drags genuinely Persian lines down.
 
-Measured with `--stats` over this project's Persian README (82 lines) against a
-set of English lines that merely quote a Persian word:
+Measured with `--stats` over this project's Persian prose against a set of
+English lines that merely quote a Persian word:
 
-| corpus | min | p05 | median |
-| --- | --- | --- | --- |
-| genuinely Persian lines | 0.400 | 0.531 | 1.000 |
-| English quoting Persian | 0.077 | — | 0.082 |
+| corpus | min | median |
+| --- | --- | --- |
+| genuinely Persian lines | 0.41 | 1.00 |
+| English quoting Persian | 0.08 | 0.08 |
 
 The two groups sit far apart, so anything between roughly 0.15 and 0.40 works.
 `0.25` is deliberately biased toward the low end: missing a broken line is
-worse than one spurious warning. Before the exclusions the Persian minimum was
-0.273, which left almost no margin — widening the gap mattered more than the
+worse than one spurious warning. Before the exclusions the Persian minimum sat
+at 0.27, which left almost no margin — widening the gap mattered more than the
 number itself.
 
 ### Suppressing false positives
