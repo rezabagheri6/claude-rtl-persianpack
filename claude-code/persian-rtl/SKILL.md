@@ -49,8 +49,8 @@ Inline code spans, markdown link targets, and bare URLs are excluded from the
 ratio. An identifier in backticks says nothing about the language of the
 sentence around it, and counting it drags genuinely Persian lines down.
 
-Measured with `--stats` over this project's Persian prose against a set of
-English lines that merely quote a Persian word:
+Calibrated with `--stats` against a corpus of Persian technical prose, versus a
+set of English lines that merely quote a Persian word:
 
 | corpus | min | median |
 | --- | --- | --- |

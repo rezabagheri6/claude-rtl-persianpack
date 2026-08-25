@@ -1,31 +1,16 @@
-# Claude RTL — پک فارسی <!-- rtl-ok: the project name is a proper noun -->
+# Claude RTL <!-- rtl-ok: the project name is a proper noun -->
 
-> **English:** two independent fixes for right-to-left text in Claude.
-> `extension/` is a userscript and MV3 extension that makes Persian, Arabic and Hebrew read correctly in claude.ai chats. `claude-code/` is a writing rule plus an audit skill for the Claude Code terminal, where the same text breaks for an entirely different reason.
+**دو اصلاح مستقل برای متن راست‌به‌چپ در کلاد.**
 
-کلاد متن فارسی را در دو جا خراب نشان می‌دهد، و علتش در این دو جا یکی نیست.
+کلاد متن فارسی را در دو جا خراب نشان می‌دهد و علتش در این دو جا یکی نیست. در مرورگر، چت `claude.ai` اصلاً جهتی برای متن تعیین نمی‌کند و پاراگراف فارسی از لبه‌ی چپ شروع می‌شود. در ترمینال Claude Code، رندرر جهت را تشخیص می‌دهد ولی آن را فقط از اولین کاراکترِ هر خط برمی‌دارد، پس خطی که با یک نام انگلیسی شروع شود وارونه می‌شود.
 
-در مرورگر، چت `claude.ai` اصلاً جهتی برای متن تعیین نمی‌کند؛ پاراگراف فارسی از لبه‌ی چپ شروع می‌شود، بولت‌ها سمت چپ می‌مانند و لیست‌ها تورفتگی‌شان را از سمت غلط می‌گیرند. در ترمینال Claude Code ماجرا برعکس است: رندرر جهت را تشخیص می‌دهد، ولی آن را فقط از اولین کاراکترِ هر خط برمی‌دارد. خطی که با یک نام انگلیسی شروع شود چپ‌چین می‌شود و نقطه‌ی آخر جمله به ابتدای خط می‌پرد.
-
-پس دو راه‌حل جدا لازم بود. هر کدام مستقل نصب می‌شوند و به دیگری کاری ندارند.
+پوشه‌ی `extension/` مشکل اول را حل می‌کند و `claude-code/` مشکل دوم را. هر کدام مستقل نصب می‌شوند و به دیگری کاری ندارند. توضیح فنی هر دو به انگلیسی در ادامه آمده است.
 
 ---
 
-## افزونه‌ی مرورگر
+## راهنمای نصب
 
-پیام‌های فارسی راست‌چین می‌شوند، پیام‌های انگلیسی دست‌نخورده می‌مانند، و بلوک‌های کد و فرمول‌های ریاضی همیشه چپ‌چین باقی می‌مانند. تصمیم برای هر بلوک جداگانه گرفته می‌شود، پس در یک گفتگوی دوزبانه هر پاراگراف جهت خودش را دارد. عنوان گفتگوها در سایدبار هم راست‌چین می‌شود.
-
-### چطور تصمیم می‌گیرد
-
-روی هر عنصر بلوکی صفت `dir` گذاشته می‌شود، بر اساس شمارش کاراکترهای متن خودِ آن بلوک: اگر بیش از ۲۵ درصدِ کاراکترهای جهت‌دار راست‌به‌چپ باشند، بلوک راست‌چین می‌شود.
-
-شاید بپرسید چرا به `dir="auto"` استاندارد مرورگر اکتفا نشده. دو دلیل داشت. اول اینکه `dir="auto"` متنی را که داخل فرزندِ دارای صفت `dir` باشد نادیده می‌گیرد، پس یک `<ul>` که `<li>`هایش قبلاً علامت خورده‌اند همیشه چپ‌چین می‌ماند. دوم اینکه فقط به **اولین** کاراکتر جهت‌دار نگاه می‌کند، و جمله‌ی فارسی‌ای که با یک شناسه‌ی انگلیسی شروع شود اشتباه تشخیص داده می‌شود — همان اشتباهی که ترمینال هم مرتکب می‌شود.
-
-چون هیچ نام کلاسی از خود `claude.ai` در کد نیست، تغییر ظاهر سایت آن را نمی‌شکند.
-
-دو کار دیگر هم لازم بود. لیست‌ها و نقل‌قول‌ها `padding` و `border` فیزیکیِ سمت چپ دارند که در حالت راست‌چین سر جای غلط می‌ماند؛ این مقادیر خوانده و به‌صورت منطقی بازنویسی می‌شوند. و کادر نوشتن پیام هم راست‌چین می‌شود، چون همان پاراگراف‌های ProseMirror اسکن می‌شوند.
-
-### نصب
+### افزونه‌ی مرورگر
 
 ساده‌ترین راه روی ویندوز، اجرای اسکریپت نصب در ریشه‌ی پروژه است:
 
@@ -35,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 اسکریپت افزونه را در `%LOCALAPPDATA%\ClaudeRTL\extension` می‌گذارد — جایی ثابت، تا اگر پوشه‌ی پروژه را جابه‌جا کردید مرورگر افزونه را گم نکند — و مسیر را در کلیپ‌بورد می‌گذارد و صفحه‌ی extensions را باز می‌کند. سه کلیک آخر با شماست، چون کروم برای «Load unpacked» رابط خط فرمان ندارد: **Developer mode** را روشن کنید، **Load unpacked** را بزنید، و مسیر را Paste کنید. برای Edge گزینه‌ی `-Browser edge` را اضافه کنید.
 
-اگر Tampermonkey دارید، راه سبک‌تری هم هست که به Developer mode نیاز ندارد: محتوای [`extension/claude-rtl.user.js`](extension/claude-rtl.user.js) را در یک اسکریپت جدید Paste کنید و ذخیره کنید. اگر ریپو پابلیک باشد، باز کردن لینک زیر همین کار را با یک کلیک انجام می‌دهد:
+اگر Tampermonkey یا Violentmonkey دارید، راه یک‌کلیکی هم هست و به Developer mode نیازی ندارد. کافی است این لینک را باز کنید:
 
 ```text
 https://raw.githubusercontent.com/rezabagheri6/claude-rtl-persianpack/main/extension/claude-rtl.user.js
@@ -43,93 +28,107 @@ https://raw.githubusercontent.com/rezabagheri6/claude-rtl-persianpack/main/exten
 
 و اگر ترجیح می‌دهید دستی نصب کنید، در `chrome://extensions` گزینه‌ی **Load unpacked** را روی پوشه‌ی `extension` بزنید.
 
-### استفاده و تنظیم
+کلید **Ctrl + Alt + R** افزونه را روشن و خاموش می‌کند و وضعیت ذخیره می‌ماند.
 
-کلید **Ctrl + Alt + R** افزونه را روشن و خاموش می‌کند و وضعیت در `localStorage` می‌ماند. در حالت افزونه، آیکون هم یک کلید روشن/خاموش دارد؛ در Tampermonkey همین گزینه از منوی افزونه در دسترس است.
-
-بالای فایل `claude-rtl.user.js` یک بخش `CONFIG` هست:
-
-| کلید | پیش‌فرض | کار |
-| --- | --- | --- |
-| `rtlThreshold` | `0.25` | حداقل نسبت کاراکتر فارسی برای راست‌چین شدن یک بلوک <!-- rtl-ok --> |
-| `sidebar` | `true` | جهت‌دهی به عنوان گفتگوها؛ اگر چیدمان سایدبار به‌هم ریخت خاموشش کنید <!-- rtl-ok --> |
-| `persianFont` | `true` | با `false` فونت خود claude.ai دست‌نخورده می‌ماند <!-- rtl-ok --> |
-| `fontStack` | Vazirmatn، بعد Tahoma | ترتیب فونت‌های فارسی <!-- rtl-ok --> |
-| `hotkey` | `Ctrl+Alt+R` | میان‌بر روشن/خاموش <!-- rtl-ok --> |
-| `defaultEnabled` | `true` | وضعیت در اولین اجرا <!-- rtl-ok --> |
-
-### آنچه حل نمی‌شود
-
-اپ دسکتاپ کلاد افزونه اجرا نمی‌کند. روی ویندوز به‌صورت یک پکیج MSIX امضاشده در `C:\Program Files\WindowsApps` نصب می‌شود که نه خواندنی است نه تغییرپذیر، و مکانیزم افزونه یا CSS سفارشی هم ندارد. این بخش فقط روی `claude.ai` در مرورگر کار می‌کند.
-
-جدول‌های خیلی پهن و نمودارهای Mermaid هم همان‌طور که هستند، چپ‌چین رندر می‌شوند.
-
----
-
-## ترمینال Claude Code
-
-رندرر ترمینال حروف عربی را درست به هم می‌چسباند و الگوریتم bidi را هم اجرا می‌کند. مشکل جای دیگری است: **جهت پایه‌ی هر خط را از اولین کاراکتر جهت‌دارِ همان خط** می‌گیرد و **کاراکترهای کنترل جهت یونیکد را نادیده می‌گیرد**.
-
-سه خط زیر محتوای یکسانی دارند و تنها فرقشان کلمه‌ی اول است:
-
-| خط | نتیجه |
-| --- | --- |
-| `فایل config.json را در ۳ ثانیه باز کن.` | درست |
-| `config.json را در ۳ ثانیه باز کن.` | خراب <!-- rtl-ok --> |
-| `‏config.json را در ۳ ثانیه باز کن.` (با U+200F) | باز هم خراب <!-- rtl-ok --> |
-
-خط سوم مهم است: افزودن کاراکتر کنترل جهت هیچ کمکی نمی‌کند. پس راه‌حل هیچ کاراکتر نامرئی‌ای لازم ندارد و به یک قانون نگارشی خلاصه می‌شود — **هر خط فارسی باید با یک کلمه‌ی فارسی شروع شود**. یعنی «اسکریپت `install.ps1` را اجرا کنید» به‌جای «`install.ps1` را اجرا کنید».
-
-### نصب
+### ترمینال Claude Code
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File install-skill.ps1
 ```
 
-اسکریپت پوشه‌ی `claude-code/persian-rtl` را در `~/.claude/skills/` کپی می‌کند تا اسکیل با `/persian-rtl` در دسترس باشد، و قانون نگارشی را به `~/.claude/CLAUDE.md` اضافه می‌کند. آن فایل در هر سشن خودکار بارگذاری می‌شود، پس چیزی برای روشن کردن نمی‌ماند.
+اسکریپت دو کار می‌کند: پوشه‌ی `claude-code/persian-rtl` را در `~/.claude/skills/` کپی می‌کند تا اسکیل با `/persian-rtl` در دسترس باشد، و قانون نگارشی را به `~/.claude/CLAUDE.md` اضافه می‌کند. آن فایل در هر سشن خودکار بارگذاری می‌شود، پس چیزی برای روشن کردن نمی‌ماند.
 
 اگر فقط اسکیل را می‌خواهید و `CLAUDE.md` دست نخورد، گزینه‌ی `-SkillOnly` را بدهید. اجرای دوباره بی‌خطر است: قانون تکراری اضافه نمی‌شود، و اگر پوشه‌ای به نام `persian-rtl` وجود داشته باشد که این اسکیل نباشد، اسکریپت متوقف می‌شود و چیزی را پاک نمی‌کند.
 
-### اسکیل
+قانونی که نصب می‌شود یک جمله است: **هر خط فارسی باید با یک کلمه‌ی فارسی شروع شود.** یعنی «اسکریپت `install.ps1` را اجرا کنید» به‌جای «`install.ps1` را اجرا کنید». دلیلش در بخش انگلیسی توضیح داده شده.
 
-قانون همیشه‌روشن کار روزمره را انجام می‌دهد. اسکیل برای وقتی است که بخواهید متنِ موجود را بازرسی کنید:
+---
+
+## The browser half
+
+`extension/` ships as both a userscript and a Chrome/Edge MV3 extension — one file serves as either. Persian messages turn right-to-left, English messages are left alone, and code blocks and math stay LTR. Direction is decided per block, so a bilingual thread reads correctly paragraph by paragraph. Sidebar conversation titles are covered too.
+
+### How direction is decided
+
+Every block-level element gets a `dir` attribute derived from counting the characters of its own text: if more than 25% of the strong-directional characters are RTL, the block becomes right-to-left.
+
+The browser's own `dir="auto"` is not enough, for two reasons. It ignores text sitting inside a child that carries its own `dir`, so a `<ul>` whose `<li>`s are already marked always resolves to LTR. And it inspects only the **first** strong character, which misreads a Persian sentence opening with a Latin identifier — the same mistake the terminal makes.
+
+No claude.ai class name appears anywhere in the code, so a redesign of the site does not break it.
+
+Two further adjustments are needed. Lists and blockquotes carry physical left-side `padding` and `border`, which land on the wrong edge once a block flips; those values are read with direction forced back to LTR and restated as logical properties. Swapping left for right instead would double-flip the UA stylesheet's own `padding-inline-start`. The composer is handled by the same pass, since it is built from ordinary ProseMirror paragraphs.
+
+Classification samples at most 400 characters by walking text nodes rather than reading `textContent`, which would build the whole string before any of it is sliced off — a real cost when streaming re-checks a growing list on every token. The walk skips code and math, so a long identifier cannot outvote the sentence holding it.
+
+### Configuration
+
+`CONFIG` sits at the top of `claude-rtl.user.js`:
+
+| key | default | effect |
+| --- | --- | --- |
+| `rtlThreshold` | `0.25` | minimum share of RTL characters for a block to flip |
+| `sidebar` | `true` | classify conversation titles; turn off if a sidebar lays out oddly |
+| `persianFont` | `true` | `false` leaves claude.ai typography untouched |
+| `fontStack` | Vazirmatn, then Tahoma | Persian font preference order |
+| `hotkey` | `Ctrl+Alt+R` | toggle shortcut |
+| `defaultEnabled` | `true` | state on first run |
+
+### Limitations
+
+The Claude desktop app runs neither extensions nor userscripts. On Windows it installs as a signed MSIX package under `C:\Program Files\WindowsApps`, which is neither readable nor modifiable, and it exposes no extension or custom-CSS mechanism. This half works only on `claude.ai` in a browser.
+
+Very wide tables and Mermaid diagrams render as-is, left to right.
+
+## The terminal half
+
+The Claude Code terminal renderer shapes Arabic correctly and runs the implicit bidi algorithm. The defect is narrower: it takes each line's **base direction from that line's first strong-directional character**, and it **ignores explicit Unicode direction controls**.
+
+These three lines carry identical content and differ only in what comes first:
+
+| line | renders |
+| --- | --- |
+| `فایل config.json را در ۳ ثانیه باز کن.` | correctly |
+| `config.json را در ۳ ثانیه باز کن.` | broken <!-- rtl-ok --> |
+| `‏config.json را در ۳ ثانیه باز کن.` (U+200F prefix) | still broken <!-- rtl-ok --> |
+
+The third line matters most: adding a direction control changes nothing. A Latin-first line gets an LTR base direction, so the sentence-final period lands at the left edge and embedded English words and digits jump position. The fix therefore needs no invisible characters and reduces to a writing rule — **every Persian line opens with a Persian word** — which `claude-code/persian-rules.md` installs into `~/.claude/CLAUDE.md`.
+
+### The audit skill
+
+The always-on rule handles day-to-day output. The skill is for inspecting text that already exists:
 
 ```bash
 python claude-code/persian-rtl/scripts/check_rtl.py path/to/file.md
 ```
 
-چند مسیر یا `-` برای stdin می‌گیرد و اگر چیزی پیدا کند با کد خروجی ۱ خارج می‌شود، پس در pre-commit یا CI هم می‌نشیند. گزینه‌ی `--include-code` داخل بلوک‌های کد را هم بررسی می‌کند، و `--stats` به‌جای بررسی، توزیع نسبت‌ها را گزارش می‌دهد تا آستانه را با داده تنظیم کنید نه با حدس.
+It accepts several paths or `-` for stdin, and exits 1 on any finding, so it drops into a pre-commit hook or CI step unchanged. `--include-code` also scans fenced code blocks; `--stats` reports the ratio distribution instead of checking, so the threshold answers to a corpus rather than a guess.
 
-بازنویسی عمداً خودکار نیست. انتخاب کلمه‌ی درست — «فایل» یا «پوشه‌ی» یا «اسکریپت» یا «دستور» — قضاوت معنایی است و از عهده‌ی یک الگوی متنی برنمی‌آید.
+It reports rather than rewrites. Choosing the right leading noun is a judgement call that no pattern match makes well.
 
-برای خاموش کردن هشدارهای نادرست، عبارت `rtl-check: off` در هر جای فایل کل فایل را رد می‌کند و `rtl-ok` روی یک خط فقط همان خط را؛ معمولاً داخل کامنت مارک‌داون نوشته می‌شوند تا نامرئی بمانند. نشانگرِ داخل بک‌تیک به حساب نمی‌آید، چون یک بار همین README با توضیح دادن نشانگر خودش را غیرفعال کرد.
+Documentation about this failure has to quote broken lines verbatim, so `rtl-check: off` anywhere in a file skips that file and `rtl-ok` on a line skips that line; both usually live inside a markdown comment. Markers inside inline code spans do not count, since documenting the marker once disabled the README documenting it.
 
-### چرا آستانه ۰٫۲۵ است
+### Why the threshold is 0.25
 
-شناسه‌های داخل بک‌تیک، مقصد لینک‌ها و آدرس‌های اینترنتی از شمارش کنار گذاشته می‌شوند، چون درباره‌ی زبان جمله چیزی نمی‌گویند و نسبت را بی‌دلیل پایین می‌آورند.
+Inline code spans, markdown link targets, and bare URLs are excluded from the ratio: an identifier in backticks says nothing about the language of the sentence around it, and counting it drags genuinely Persian lines down.
 
-با `--stats` روی متن فارسی همین ریپو اندازه‌گیری شد: کمترین نسبت در ۴۷ خط فارسی ۰٫۴۱ بود، در حالی که خطوط انگلیسی‌ای که فقط یک کلمه‌ی فارسی نقل می‌کنند زیر ۰٫۱۵ می‌مانند. فاصله زیاد است، پس هر عددی بین این دو کار می‌کند و ۰٫۲۵ عمداً به سمت پایین متمایل است — ندیدن یک خط خراب بدتر از یک هشدار اضافه است.
+Calibrated with `--stats` against a corpus of Persian technical prose: the lowest ratio among genuinely Persian lines was 0.41, while English lines merely quoting a Persian word stayed under 0.15. The gap is wide, so anything between the two works; 0.25 leans low on purpose, because missing a broken line costs more than one spurious warning. Before those exclusions the Persian floor sat at 0.27, leaving almost no margin — widening the gap mattered more than the number.
 
-پیش از کنار گذاشتن کد و آدرس، کمینه‌ی گروه فارسی ۰٫۲۷ بود و تقریباً حاشیه‌ای نمی‌ماند. یعنی باز کردن آن فاصله مهم‌تر از خودِ عدد بود.
+### Limitations
 
-### آنچه حل نمی‌شود
+Terminal text always sets flush left. Padding lines with spaces to fake right alignment breaks on window resize and mangles code blocks.
 
-متن ترمینال همیشه از لبه‌ی چپ می‌چیند. پر کردن ابتدای خطوط با فاصله برای شبیه‌سازی تراز راست، با تغییر اندازه‌ی پنجره به‌هم می‌ریزد و بلوک‌های کد را خراب می‌کند.
+## Development
 
----
-
-## توسعه
-
-صفحه‌ی [`test/rtl-sandbox.html`](test/rtl-sandbox.html) نمونه‌ای با ساختار مشابه چت کلاد است: پیام‌های دوزبانه، لیست، نقل‌قول، بلوک کد، سایدبار، و دکمه‌ای که استریم شدن پاسخ را شبیه‌سازی می‌کند. مستقیم در مرورگر باز می‌شود.
+`test/rtl-sandbox.html` mirrors the structure of a Claude chat: bilingual messages, lists, a blockquote, a code block, a sidebar, and a button that simulates a streamed reply. It opens directly in a browser.
 
 ```bash
-node test/run-browser-tests.mjs          # ۲۳ ادعا در کروم هدلس
-python -m unittest discover claude-code/persian-rtl/tests   # ۲۱ تست واحد
+node test/run-browser-tests.mjs                             # 23 assertions, headless Chrome
+python -m unittest discover claude-code/persian-rtl/tests   # 21 unit tests
 ```
 
-تست مرورگر نه چارچوب تستی می‌خواهد نه دانلود مرورگر: همان صفحه ادعاها را اجرا می‌کند و نتیجه را در DOM می‌نویسد، و `chrome --dump-dom` بیرونش می‌آورد. اگر کروم جای غیرمعمولی نصب است، مسیرش را در متغیر `CHROME` بگذارید. اعتبار خود سوئیت با سه جهش عمدی در کد سنجیده شد و هر سه بار تست‌های مربوطه قرمز شدند.
+The browser suite needs no test framework and no browser download: the page runs its own assertions and writes them into the DOM, and `chrome --dump-dom` carries them back out. Set `CHROME` if Chrome lives somewhere unusual. Mutation confirms the suite discriminates — disabling the sidebar pass, removing the padding mirroring, and removing the `requestAnimationFrame` timer fallback each turn the matching assertions red.
 
-دو اسکریپت کمکی دیگر هم هست: `pack.ps1` فایل zip افزونه را برای بخش Releases می‌سازد، و `tools/make_icons.py` آیکون‌ها را تولید می‌کند (سه نوار راست‌چین، در چهار برابر اندازه کشیده و بعد کوچک‌شده تا لبه‌های نسخه‌ی ۱۶ پیکسلی تمیز بماند).
+Two helper scripts round it out: `pack.ps1` builds the extension zip for Releases, and `tools/make_icons.py` generates the icons — three right-aligned bars, drawn at 4x and downsampled so the 16px edges stay clean.
 
 ---
 
