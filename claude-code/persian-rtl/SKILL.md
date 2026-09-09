@@ -27,6 +27,32 @@ and digits jump position.
 Digits and punctuation are directionally weak and do not cause the flip — only
 a Latin letter arriving before any Persian letter does.
 
+## The second failure
+
+A markdown-styled span — inline code, or a link — whose **content is Latin**
+breaks the line when Persian text continues after it. The renderer lays the
+span out as its own segment and cannot restore right-to-left flow afterwards.
+
+Verified 2026-09-09:
+
+| line | renders |
+| --- | --- |
+| ``کامیت فعلی این است: `5d6bc2e` `` | correct — span is last |
+| ``کامیت `5d6bc2e` فعلی است.`` | broken — Persian follows the span |
+| `مرورگر Chrome روی سیستم نصب است.` | correct — Latin, but unstyled |
+| `این نکته **بسیار مهم** است و باید رعایت شود.` | correct — styled, but Persian |
+| `پرونده‌ی [راهنما](README.md) را ببینید.` | correct — link text is Persian |
+
+The break needs all three conditions together: a styled span, Latin inside it,
+and Persian after it. A link's target never reaches the screen, so only its
+display text counts.
+
+Fix it by moving the span to the end of the line, by dropping the backticks
+when the identifier must stay mid-sentence, or by giving a link Persian display
+text. Note that the two rules bite together: putting a Persian word in front of
+`` `install.ps1` `` satisfies the first rule but leaves the span mid-sentence,
+so the plain identifier is what satisfies both.
+
 ## Running the check
 
 ```bash
@@ -85,8 +111,8 @@ the markers are looked for.
 python -m unittest discover tests
 ```
 
-21 tests covering first-strong-character detection, the language threshold,
-direction controls, code fences, and the suppression markers.
+32 tests covering first-strong-character detection, the mid-sentence span rule,
+the language threshold, direction controls, code fences, and the suppression markers.
 
 ## Fixing what it reports
 
@@ -96,12 +122,17 @@ names the thing the Latin token refers to.
 
 | flagged | rewrite |
 | --- | --- |
-| `` `install.ps1` را اجرا کن. `` | ``اسکریپت `install.ps1` را اجرا کن.`` |
+| `` `install.ps1` را اجرا کن. `` | `اسکریپت install.ps1 را اجرا کن.` |
 | `config.json را ویرایش کن.` | `فایل config.json را ویرایش کن.` |
-| `[README.md](README.md) را بخوان.` | `فایل [README.md](README.md) را بخوان.` |
+| `[README.md](README.md) را بخوان.` | `پرونده‌ی [راهنما](README.md) را بخوان.` |
 | `src/utils را بررسی کن.` | `پوشه‌ی src/utils را بررسی کن.` |
 | `npm install را بزن.` | `دستور npm install را بزن.` |
 | `## config.json چیست؟` | `## فایل config.json چیست؟` |
+
+The first two rows drop the backticks rather than keeping them: a Persian word
+in front satisfies rule 1, but a styled span left mid-sentence trips rule 2.
+The link row swaps the display text to Persian for the same reason. Where the
+reader needs to see the path itself, put the span at the end of the line.
 
 Common openers: فایل، پوشه‌ی، اسکریپت، دستور، پکیج، تابع، متغیر، برنچ، پورت،
 کلاس، سرویس، ماژول.

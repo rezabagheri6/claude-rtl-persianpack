@@ -65,6 +65,11 @@ CODE_SPAN = re.compile(r"``.+?``|`[^`]*`")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 BARE_URL = re.compile(r"\b(?:https?|ftp|file)://\S+")
 
+# Styled spans whose *rendered* content matters for rule 2: inline code, and a
+# link's display text. A link's target never reaches the screen, so it cannot
+# affect layout.
+STYLED_SPAN = re.compile(r"``(?P<a>.+?)``|`(?P<b>[^`]*)`|\[(?P<c>[^\]]*)\]\([^)]*\)")
+
 
 def rtl_ratio(line):
     """Share of strong-directional characters that are RTL, or None if the line
@@ -86,6 +91,26 @@ def rtl_ratio(line):
         return None
     ltr = len(LTR.findall(prose))
     return rtl / (rtl + ltr)
+
+
+def latin_span_midline(line):
+    """Find a styled span holding Latin text with Persian still to come.
+
+    The renderer lays a styled span out as its own segment and cannot restore
+    right-to-left flow after it, so `code` or a Latin-texted link sitting mid
+    sentence throws everything following it out of place. The same span at the
+    end of the line is fine, an unstyled Latin word is fine, and a span holding
+    Persian is fine — the break needs all three conditions together.
+
+    Returns the offending span's rendered text, or None.
+    """
+    for match in STYLED_SPAN.finditer(line):
+        content = next(g for g in match.group("a", "b", "c") if g is not None)
+        if not LTR.search(content) or RTL.search(content):
+            continue  # unstyled-equivalent for our purposes, or Persian inside
+        if RTL.search(line[match.end():]):
+            return content.strip()
+    return None
 
 
 def check_line(line, threshold):
@@ -111,6 +136,14 @@ def check_line(line, threshold):
             excerpt = excerpt[:60] + "…"
         problems.append(
             ("latin-first", f"starts with Latin {first.group()!r}: «{excerpt}»")
+        )
+
+    span = latin_span_midline(line)
+    if span is not None:
+        problems.append(
+            ("latin-span-midline",
+             f"styled Latin span «{span}» sits mid-sentence; move it to the end "
+             f"of the line, or drop its backticks")
         )
 
     return problems
